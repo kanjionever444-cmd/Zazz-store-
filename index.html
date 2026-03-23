@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZAZZ STORE - Top-Up Game</title>
+<style>
+body{font-family:Arial,sans-serif;margin:0;padding:0;background:#f5f5f5}
+header{background:#4CAF50;color:#fff;text-align:center;padding:20px}
+main{display:flex;justify-content:center;align-items:flex-start;min-height:80vh;padding:20px}
+.topup-form{background:#fff;padding:30px;border-radius:12px;box-shadow:0 0 15px rgba(0,0,0,0.1);width:100%;max-width:600px}
+.topup-form h2{text-align:center;margin-bottom:20px;color:#333}
+label{display:block;margin-top:10px;margin-bottom:5px;color:#555}
+select, input, button{width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;margin-bottom:10px}
+button{background:#4CAF50;color:#fff;border:none;cursor:pointer;transition:.3s}
+button:hover{background:#45a049}
+#confirmation{margin-top:20px;padding:15px;background:#e7f7e7;border-radius:8px;border:1px solid #b2e2b2;text-align:center;display:none}
+#specialOffers,#mlSpecialItems{margin-top:20px;padding:15px;border:1px dashed #4CAF50;border-radius:8px;display:none}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🎮 ZAZZ STORE</h1>
+<p>Pilih game & paket, lakukan pembayaran DANA</p>
+</header>
+
+<main>
+<div class="topup-form">
+<h2>Form Top-Up</h2>
+<form id="formTopup">
+    <label for="game">Pilih Game:</label>
+    <select id="game" required>
+        <option value="">-- Pilih Game --</option>
+        <option value="ff">Free Fire</option>
+        <option value="ml">Mobile Legends</option>
+        <option value="roblox">Roblox</option>
+    </select>
+
+    <div id="extraFields"></div>
+
+    <label for="package">Pilih Paket:</label>
+    <select id="package" required>
+        <option value="">-- Pilih Paket --</option>
+    </select>
+
+    <div id="specialOffers">
+        <h3>🎁 Penawaran Spesial FF (Pilih 1)</h3>
+        <label><input type="radio" name="ffOffer" value="BP Card - Rp 46.000"> BP Card - Rp 46.000</label>
+        <label><input type="radio" name="ffOffer" value="Member Mingguan - Rp 30.000"> Member Mingguan - Rp 30.000</label>
+        <label><input type="radio" name="ffOffer" value="Member Bulanan - Rp 90.000"> Member Bulanan - Rp 90.000</label>
+        <label><input type="radio" name="ffOffer" value="Mingguan Elit - Rp 20.000"> Mingguan Elit - Rp 20.000</label>
+    </div>
+
+    <div id="mlSpecialItems">
+        <h3>🎁 Special Items ML (Pilih 1)</h3>
+        <label><input type="radio" name="mlSpecial" value="Weekly Elite Pack - Rp 15.510"> Weekly Elite Pack - Rp 15.510</label>
+        <label><input type="radio" name="mlSpecial" value="Weekly Diamonds Pass - Rp 27.879"> Weekly Diamonds Pass - Rp 27.879</label>
+        <label><input type="radio" name="mlSpecial" value="2x Weekly Diamonds Pass - Rp 57.998"> 2x Weekly Diamonds Pass - Rp 57.998</label>
+        <label><input type="radio" name="mlSpecial" value="Monthly Epic Pack - Rp 68.751"> Monthly Epic Pack - Rp 68.751</label>
+        <label><input type="radio" name="mlSpecial" value="3x Weekly Diamonds Pass - Rp 85.997"> 3x Weekly Diamonds Pass - Rp 85.997</label>
+        <label><input type="radio" name="mlSpecial" value="4x Weekly Diamond Pass - Rp 113.996"> 4x Weekly Diamond Pass - Rp 113.996</label>
+        <label><input type="radio" name="mlSpecial" value="Twilight Pass - Rp 135.812"> Twilight Pass - Rp 135.812</label>
+        <label><input type="radio" name="mlSpecial" value="5x Weekly Diamonds Pass - Rp 140.995"> 5x Weekly Diamonds Pass - Rp 140.995</label>
+    </div>
+
+    <button type="submit">Top-Up Sekarang</button>
+</form>
+
+<div id="confirmation">
+    <h3>Top-Up dicatat!</h3>
+    <p id="confirmText"></p>
+    <p><strong>Cara Pembayaran:</strong><br>
+       Transfer via DANA ke nomor: <em>882008584519</em></p>
+    <button id="sendEmail">Lanjut ke Proses</button>
+</div>
+</div>
+</main>
+
+<script>
+// Format harga pakai titik
+function formatPrice(num){
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g,".");
+}
+
+// Paket
+const packages={
+    ff:[
+        {name:"5 Diamond", price:2000},
+        {name:"12 Diamond", price:3000},
+        {name:"50 Diamond", price:9000},
+        {name:"70 Diamond", price:11000},
+        {name:"91 Diamond", price:14000},
+        {name:"140 Diamond", price:21000},
+        {name:"355 Diamond", price:51000},
+        {name:"720 Diamond", price:101000},
+        {name:"1.450 Diamond", price:201000},
+        {name:"2.180 Diamond", price:301000},
+        {name:"3.640 Diamond", price:501000},
+        {name:"7.290 Diamond", price:1001000},
+        {name:"36.500 Diamond", price:5001000},
+        {name:"73.100 Diamond", price:10001000}
+    ],
+    ml:[
+        {name:"5 Diamonds", price:5506},   // 3506+2000
+        {name:"11 Diamonds", price:4847},  // 2847+2000
+        {name:"10 Diamonds", price:5053},  // 3053+2000
+        {name:"12 Diamonds", price:5512},  // 3512+2000
+        {name:"14 Diamonds", price:6070},  // 4070+2000
+        {name:"50 Diamonds", price:11000+2000},
+        {name:"70 Diamonds", price:13000+2000},
+        {name:"91 Diamonds", price:16000+2000},
+        {name:"140 Diamonds", price:23000+2000}
+    ],
+    roblox:[
+        {name:"50 Robux", price:10000, confirm:"Buat GamePass senilai 72 YA!"},
+        {name:"100 Robux", price:20000, confirm:"Buat GamePass senilai 143 YA!"},
+        {name:"150 Robux", price:25000, confirm:"Buat GamePass senilai 215 YA!"},
+        {name:"200 Robux", price:30000, confirm:"Buat GamePass senilai 286 YA!"}
+    ]
+};
+
+const gameSelect=document.getElementById("game");
+const packageSelect=document.getElementById("package");
+const extraFields=document.getElementById("extraFields");
+const specialOffers=document.getElementById("specialOffers");
+const mlSpecialItems=document.getElementById("mlSpecialItems");
+const form=document.getElementById("formTopup");
+const confirmation=document.getElementById("confirmation");
+const confirmText=document.getElementById("confirmText");
+
+let currentUser="", currentGame="", currentPackage="";
+
+gameSelect.addEventListener("change",function(){
+    const g=this.value;
+    packageSelect.innerHTML='<option value="">-- Pilih Paket --</option>';
+    extraFields.innerHTML='';
+    specialOffers.style.display='none';
+    mlSpecialItems.style.display='none';
+
+    if(packages[g]){
+        packages[g].forEach(p=>{
+            const opt=document.createElement("option");
+            opt.value=JSON.stringify(p);
+            opt.text=`${p.name} - Rp ${formatPrice(p.price)}`;
+            packageSelect.appendChild(opt);
+        });
+    }
+
+    if(g==="ff"){
+        extraFields.innerHTML='<label>ID FF:</label><input type="text" id="ffID" placeholder="Masukkan ID FF" required>';
+        specialOffers.style.display='block';
+    } else if(g==="ml"){
+        extraFields.innerHTML='<label>ID ML:</label><input type="text" id="mlID" placeholder="Masukkan ID ML" required><label>Server:</label><input type="text" id="mlServer" placeholder="Masukkan Server" required>';
+        mlSpecialItems.style.display='block';
+    } else if(g==="roblox"){
+        extraFields.innerHTML='<label>Username Roblox:</label><input type="text" id="rbxUser" placeholder="Masukkan Username" required>';
+    }
+});
+
+form.addEventListener("submit",function(e){
+    e.preventDefault();
+    const g=gameSelect.value;
+    const pkgValue=packageSelect.value;
+    if(!pkgValue||!g){ alert("Semua kolom harus diisi!"); return; }
+    const pkg=JSON.parse(pkgValue);
+
+    let user='';
+    if(g==="ff"){ user=document.getElementById("ffID").value; }
+    else if(g==="ml"){ user=document.getElementById("mlID").value+' / '+document.getElementById("mlServer").value; }
+    else if(g==="roblox"){ user=document.getElementById("rbxUser").value; }
+
+    currentUser=user;
+    currentGame=g;
+    currentPackage=pkg;
+
+    let offer='';
+    if(g==="ff"){
+        const selOffer=document.querySelector('input[name="ffOffer"]:checked');
+        if(selOffer){ offer=' + '+selOffer.value; }
+    }
+    if(g==="ml"){
+        const selOffer=document.querySelector('input[name="mlSpecial"]:checked');
+        if(selOffer){ offer=' + '+selOffer.value; }
+    }
+
+    confirmText.innerText=`Top-Up ${pkg.name}${offer} untuk ${g.toUpperCase()} dengan ${user} dicatat. Harga: Rp ${formatPrice(pkg.price)}`;
+    confirmation.style.display='block';
+    confirmation.scrollIntoView({behavior:"smooth"});
+});
+
+document.getElementById("sendEmail").addEventListener("click",function(){
+    if(!currentPackage||!currentGame||!currentUser){ alert("Data tidak lengkap!"); return; }
+    const pkg=currentPackage;
+    let offer='';
+    if(currentGame==="ff"){
+        const selOffer=document.querySelector('input[name="ffOffer"]:checked');
+        if(selOffer){ offer=' + '+selOffer.value; }
+    }
+    if(currentGame==="ml"){
+        const selOffer=document.querySelector('input[name="mlSpecial"]:checked');
+        if(selOffer){ offer=' + '+selOffer.value; }
+    }
+    const email="zazzpp.73@gmail.com";
+    const subject=encodeURIComponent("Top-Up Baru");
+    const body=encodeURIComponent(`Top-Up ${pkg.name}${offer} untuk ${currentGame.toUpperCase()} oleh ${currentUser}. Harga: Rp ${formatPrice(pkg.price)}.`);
+    window.location.href=`mailto:${email}?subject=${subject}&body=${body}`;
+});
+</script>
+
+</body>
+</html>
